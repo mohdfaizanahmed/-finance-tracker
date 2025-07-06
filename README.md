@@ -2,6 +2,20 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+### Prerequisites
+
+1. **MongoDB Setup**: You need a MongoDB database to store transactions. You can use:
+   - [MongoDB Atlas](https://www.mongodb.com/atlas) (free cloud database)
+   - Local MongoDB installation
+
+2. **Environment Variables**: Create a `.env.local` file in the root directory with your MongoDB connection string:
+
+```bash
+MONGODB_URI=mongodb+srv://your-username:your-password@your-cluster.mongodb.net/finance-tracker?retryWrites=true&w=majority
+```
+
+### Installation
+
 First, run the development server:
 
 ```bash
@@ -19,6 +33,13 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Features
+
+- Add, view, and delete financial transactions
+- Monthly spending visualization with charts
+- Responsive design with modern UI components
+- MongoDB integration for data persistence
 
 ## Learn More
 

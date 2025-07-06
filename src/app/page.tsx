@@ -5,39 +5,68 @@ import { Transaction } from '@/models/transaction'
 import { TransactionForm } from '@/components/TransactionForm'
 import { TransactionList } from '@/components/TransactionList'
 import { MonthlyBarChart } from '@/components/MonthlyBarChart'
-
-const LOCAL_STORAGE_KEY = 'finance-tracker-transactions'
+import { SummaryCards } from '@/components/SummaryCards'
+import { CategoryPieChart } from '@/components/CategoryPieChart'
 
 export default function Home() {
   const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [loading, setLoading] = useState(true)
 
-  // Load from localStorage on mount
-  useEffect(() => {
-    const stored = localStorage.getItem(LOCAL_STORAGE_KEY)
-    if (stored) {
-      setTransactions(JSON.parse(stored))
+  // Load transactions from MongoDB
+  const fetchTransactions = async () => {
+    setLoading(true)
+    try {
+      const res = await fetch('/api/transactions')
+      const data = await res.json()
+      setTransactions(data)
+    } catch (err) {
+      console.error('Failed to load transactions:', err)
+    } finally {
+      setLoading(false)
     }
-  }, [])
-
-  // Save to localStorage whenever transactions change
-  useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(transactions))
-  }, [transactions])
-
-  const handleAdd = (txn: Transaction) => {
-    setTransactions([txn, ...transactions])
   }
 
-  const handleDelete = (id: string) => {
-    setTransactions(transactions.filter(txn => txn.id !== id))
+  useEffect(() => {
+    fetchTransactions()
+  }, [])
+
+  const handleAdd = async (txn: Transaction) => {
+    try {
+      await fetch('/api/transactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(txn),
+      })
+      fetchTransactions()
+    } catch (err) {
+      console.error('Add failed:', err)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    try {
+      await fetch('/api/transactions', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+      fetchTransactions()
+    } catch (err) {
+      console.error('Delete failed:', err)
+    }
   }
 
   return (
-    <main className="p-6 space-y-8 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold">Personal Finance Tracker</h1>
-      <TransactionForm onAdd={handleAdd} />
+    <main className="p-6 space-y-8 max-w-4xl mx-auto">
+    <h1 className="text-3xl font-bold text-center">📊 Personal Finance Dashboard</h1>
+    <TransactionForm onAdd={handleAdd} />
+    <SummaryCards transactions={transactions} />
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <MonthlyBarChart transactions={transactions} />
-      <TransactionList transactions={transactions} onDelete={handleDelete} />
-    </main>
+      <CategoryPieChart transactions={transactions} />
+    </div>
+    <TransactionList transactions={transactions} onDelete={handleDelete} />
+  </main>
+  
   )
 }
